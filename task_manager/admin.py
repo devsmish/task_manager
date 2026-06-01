@@ -34,3 +34,8 @@ class SubTaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'task', 'status', 'deadline', 'created_at')
     list_filter = ('status', 'task', 'deadline', 'created_at')
     search_fields = ('title', 'description')
+    actions = ['change_status_on_done']
+
+    @admin.action(description="Change on Done")
+    def change_status_on_done(self, request, objects):
+        objects.update(status='done')
