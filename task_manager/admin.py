@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from task_manager.models import Task, SubTask, Category
 
 
@@ -17,9 +18,15 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     inlines = [TaskInline]
-    list_display = ('title', 'description', 'status', 'deadline', 'created_at')
+    list_display = ('show_title', 'description', 'status', 'deadline', 'created_at')
     list_filter = ('status', 'categories', 'deadline', 'created_at')
     search_fields = ('title', 'description')
+
+    @admin.display(description="Task title")
+    def show_title(self, obj: Task) -> str:
+        if len(obj.title) <= 10:
+            return obj.title
+        return f"{obj.title[:10]}..."
 
 
 @admin.register(SubTask)
