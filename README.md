@@ -8,6 +8,8 @@ Simple Django-based Task Manager application with support for tasks, subtasks, a
 - Task categorization (Many-to-Many)
 - Task status tracking
 - Django Admin integration
+- **REST API Endpoints (v1) with Django REST Framework** 🚀
+- **Dynamic Task Statistics & Analytics** 📊
 
 ## Admin Panel
 Access /admin to manage:
@@ -15,7 +17,24 @@ Tasks
 SubTasks
 Categories
 
-Releases
+## Releases
+
+Release v 0.2.0
+### 🚀 Core REST API Implementation (v1)
+
+The system now includes a fully functional REST API built with Django REST Framework, featuring proper API versioning 
+and secure validation:
+
+* **API Versioning:** All endpoints are strictly versioned and exposed under the `/api/v1/` prefix for maximum 
+* compatibility.
+* **Task Management Endpoints:** Added secure endpoints for task creation (`POST /api/v1/tasks/create/`) with type 
+* validation, fetching all tasks (`GET /api/v1/tasks/`), and retrieving a specific task by ID (`GET /api/v1/tasks/<id>/`) 
+* with safe `404 Not Found` error handling.
+* **Dynamic Analytics:** Integrated a dedicated aggregation endpoint (`GET /api/v1/tasks/statistics/`) that computes 
+* total task counts, breakdown analysis based on model statuses, and real-time overdue metrics using Django's timezone 
+* engine.
+* **Architecture:** Implemented structured ModelSerializers and decoupled URL routing to separate API concerns from the 
+* core Django views.
 
 Release v 0.1.1
 ### 📋 Task & Subtask Management (Admin Panel)
