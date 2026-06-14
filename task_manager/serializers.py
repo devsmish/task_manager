@@ -39,3 +39,17 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"name": "A category with this name already exists."})
 
         return super().update(instance, validated_data)
+
+
+class SubTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubTask
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    subtask_set = SubTaskSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtask_set']
