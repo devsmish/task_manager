@@ -12,6 +12,7 @@ from task_manager.serializers import (TaskCreateSerializer,
                                       SubTaskCreateSerializer)
 from task_manager.models import Task, statuses, SubTask, WeekDay
 from django.db.models.functions import ExtractWeekDay
+from rest_framework.pagination import PageNumberPagination
 
 def greetings(request: HttpRequest) -> HttpResponse:
     username = 'Serhii'
@@ -67,32 +68,32 @@ def task_detail(request, pk):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-def task_statistics(request):
-    total_tasks = Task.objects.count()
-
-    status_counts = {
-        'new': Task.objects.filter(status='new').count(),
-        'in_progress': Task.objects.filter(status='in_progress').count(),
-        'pending': Task.objects.filter(status='pending').count(),
-        'blocked': Task.objects.filter(status='blocked').count(),
-        'done': Task.objects.filter(status='done').count(),
-    }
-
-    current_time = timezone.now()
-    overdue_tasks = Task.objects.filter(
-        deadline__lt=current_time
-    ).exclude(
-        status='done'
-    ).count()
-
-    statistics_data = {
-        'total_tasks': total_tasks,
-        'status_breakdown': status_counts,
-        'overdue_tasks': overdue_tasks
-    }
-
-    return Response(statistics_data, status=status.HTTP_200_OK)
+# @api_view(['GET'])
+# def task_statistics(request):
+#     total_tasks = Task.objects.count()
+#
+#     status_counts = {
+#         'new': Task.objects.filter(status='new').count(),
+#         'in_progress': Task.objects.filter(status='in_progress').count(),
+#         'pending': Task.objects.filter(status='pending').count(),
+#         'blocked': Task.objects.filter(status='blocked').count(),
+#         'done': Task.objects.filter(status='done').count(),
+#     }
+#
+#     current_time = timezone.now()
+#     overdue_tasks = Task.objects.filter(
+#         deadline__lt=current_time
+#     ).exclude(
+#         status='done'
+#     ).count()
+#
+#     statistics_data = {
+#         'total_tasks': total_tasks,
+#         'status_breakdown': status_counts,
+#         'overdue_tasks': overdue_tasks
+#     }
+#
+#     return Response(statistics_data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -118,10 +119,23 @@ def task_statistics(request):
     return Response(statistics_data, status=status.HTTP_200_OK)
 
 
+class SubTaskPagination(PageNumberPagination):
+    page_size = 5
+
+
 class SubTaskListCreateView(APIView):
 
     def get(self, request):
-        subtasks = SubTask.objects.all()
+        subtasks = SubTask.objects.all().order_by('-created_at')
+
+        paginator = SubTaskPagination()
+
+        page = paginator.paginate_queryset(subtasks, request)
+
+        if page is not None:
+            serializer = SubTaskSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
         serializer = SubTaskSerializer(subtasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
