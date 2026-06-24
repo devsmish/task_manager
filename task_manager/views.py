@@ -128,8 +128,16 @@ class SubTaskListCreateView(APIView):
     def get(self, request):
         subtasks = SubTask.objects.all().order_by('-created_at')
 
-        paginator = SubTaskPagination()
+        task_name = request.query_params.get('task_name')
+        status_param = request.query_params.get('status')
 
+        if task_name:
+            subtasks = subtasks.filter(task__title__icontains=task_name)
+
+        if status_param:
+            subtasks = subtasks.filter(status=status_param)
+
+        paginator = SubTaskPagination()
         page = paginator.paginate_queryset(subtasks, request)
 
         if page is not None:
