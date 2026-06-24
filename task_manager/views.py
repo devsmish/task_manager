@@ -10,7 +10,8 @@ from task_manager.serializers import (TaskCreateSerializer,
                                       TaskListSerializer,
                                       SubTaskSerializer,
                                       SubTaskCreateSerializer)
-from task_manager.models import Task, statuses, SubTask
+from task_manager.models import Task, statuses, SubTask, WeekDay
+from django.db.models.functions import ExtractWeekDay
 
 def greetings(request: HttpRequest) -> HttpResponse:
     username = 'Serhii'
@@ -29,6 +30,25 @@ def task_create(request):
 @api_view(['GET'])
 def task_list(request):
     tasks = Task.objects.all()
+
+    day_param = request.query_params.get('day')
+
+    if day_param:
+        day_upper = day_param.upper()
+
+        try:
+            day_value = WeekDay[day_upper].value
+            tasks = tasks.annotate(
+                day_of_week=ExtractWeekDay('created_at')
+            ).filter(day_of_week=day_value)
+
+        except KeyError:
+            valid_days = ", ".join([member.name.lower() for member in WeekDay])
+            return Response(
+                {"error": f"Invalid day '{day_param}'. Valid options are: {valid_days}."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
     serializer = TaskListSerializer(tasks, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
