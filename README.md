@@ -11,6 +11,7 @@ Simple Django-based Task Manager application with support for tasks, subtasks, a
 - **REST API Endpoints (v1) with Django REST Framework** (Tasks & SubTasks CRUD) 🚀
 - **Advanced Serializer Validation & Nested Relations** 🛡️
 - **Dynamic Task Statistics & Analytics** 📊
+- **Query Parameters, Extract Methods & Pagination** 🔍
 
 ## Admin Panel
 Access `/admin` to manage:
@@ -19,6 +20,17 @@ Access `/admin` to manage:
 - Categories
 
 ## Releases
+
+Release v0.2.2
+### 🔍 Request Query Parameters, Date Component Extraction & Pagination
+
+This release enhances the existing API endpoints by introducing advanced querying, performance-optimized filtering, and data pagination mechanics:
+
+* **SubTask Pagination:** Integrated `PageNumberPagination` to split the subtask data layer, restricting payload responses to a maximum of **5 objects per page**.
+* **Strict Chronological Ordering:** Enforced descending database-level sorting (`-created_at`) across subtask listings, ensuring the newest items always appear first.
+* **Database Date Components:** Implemented precise task filtering by days of the week by utilizing Django's structural `ExtractWeekDay` method inside an analytical annotated aggregation layer.
+* **Combined Query Parameter Filtering:** Developed chained filtering pipelines (logical `AND`) for subtasks, supporting case-insensitive partial parent title matches (`task__title__icontains`) and exact status filters simultaneously.
+* **Code Optimization:** Conducted a comprehensive code cleanup by removing redundant, non-optimized endpoint view mappings and reducing database round-trips.
 
 Release v0.2.1
 ### 🛠️ Advanced Serializers, Validation & SubTask APIViews
@@ -47,7 +59,7 @@ The system includes a customized Django Admin interface tailored for efficient t
 
 * **Inline Subtask Editing:** Subtasks can be created, updated, or removed directly from the parent Task's editing form without switching pages.
 * **Smart Text Truncation:** To keep the Task dashboard clean, task names in the main list view are automatically truncated to 10 characters if they exceed that limit. Full names are strictly preserved in dropdowns and selection menus to avoid ambiguity.
-* **Bulk Operations:** Administrators can update multiple subtasks simultaneously. Use the **"Actions"** dropdown in the Subtasks list view to instantly mark all selected items as **Done**.
+* **Bulk Operations:** Administrators can update multiple subtasks simultaneously. Use the **\"Actions\"** dropdown in the Subtasks list view to instantly mark all selected items as **Done**.
 
 Release v0.1.0
 ### Core Models
