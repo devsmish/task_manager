@@ -23,9 +23,17 @@ def greetings(request: HttpRequest) -> HttpResponse:
     return HttpResponse(f"Hello, {username}!")
 
 
+class TaskPagination(PageNumberPagination):
+    page_size = 5
+
+
 class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = TaskPagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter]
 
     filterset_fields = ['status', 'deadline']
     search_fields = ['title', 'description']
