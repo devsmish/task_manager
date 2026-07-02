@@ -21,6 +21,21 @@ Access `/admin` to manage:
 
 ## Releases
 
+Release v0.2.4
+### 🗂️ Category ViewSet, Custom Aggregations & Reusable Soft Deletion System
+
+This release introduces a complete Category management system via unified viewsets, along with an enterprise-grade, 
+highly reusable Soft Deletion architecture to preserve relational data integrity across the platform:
+
+* **ModelViewSet Integration:** Exposed comprehensive CRUD capabilities for the `Category` model using a streamlined 
+* `ModelViewSet`, wired automatically via DRF's `DefaultRouter`.
+* **Dynamic Task Aggregation:** Added a custom `@action` detail endpoint (`count_tasks`) to compute and return total 
+* active tasks associated with any given category.
+* **Reusable Soft Deletion Engine:** Designed an abstract `SoftDeleteModel` and a custom `SoftDeleteManager` that 
+* overrides default querysets to seamlessly filter out soft-deleted records from standard API responses.
+* **Database Schema Synchronization:** Generated and applied required database migrations to introduce `is_deleted` and 
+* `deleted_at` tracking layers without physical data loss.
+
 Release v0.2.3
 ### 🛠️ DRF Generic Views Migration, Advanced Filtering & Full-Text Search
 
