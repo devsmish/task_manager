@@ -1,8 +1,8 @@
 from django.utils import timezone
 from django.http import HttpRequest, HttpResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework import status, filters
+from rest_framework import status, filters, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,9 +12,10 @@ from task_manager.serializers import (
     TaskListSerializer,
     TaskDetailSerializer,
     SubTaskSerializer,
-    SubTaskCreateSerializer
+    SubTaskCreateSerializer,
+    CategorySerializer,
 )
-from task_manager.models import Task, statuses, SubTask
+from task_manager.models import Task, statuses, SubTask, Category
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -109,3 +110,17 @@ class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if self.request.method in ['PUT', 'PATCH']:
             return SubTaskCreateSerializer
         return SubTaskSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    @action(detail=True, methods=['get'])
+    def count_tasks(self, request, pk=None):
+        category = self.get_object()
+        task_count = category.task_set.count()
+        return Response({
+            'category': category.name,
+            'task_count': task_count
+        })
