@@ -1,4 +1,7 @@
 from django.db import models
+from django.utils import timezone
+
+from task_manager.managers import SoftDeleteManager
 
 
 class WeekDay(models.IntegerChoices):
@@ -19,9 +22,25 @@ statuses = [
     ('done', 'Done'),
 ]
 
-class Category(models.Model):
+class SoftDeleteModel(models.Model):
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
+
+
+class Category(SoftDeleteModel): # Наследуемся от нашего SoftDeleteModel
     '''Execution Category'''
-    name = models.CharField(max_length=50) # Название категории. убрал unique=True
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
