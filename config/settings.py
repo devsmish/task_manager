@@ -144,3 +144,68 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'task_manager.pagination.CustomCursorPagination',
     'PAGE_SIZE': 6,
 }
+
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} ({module}) -> {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname}: {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+
+        'http_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'http_logs.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+
+        'db_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'db_logs.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+
+    'loggers': {
+
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+
+        'django.server': {
+            'handlers': ['http_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+
+        'django.db.backends': {
+            'handlers': ['db_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
