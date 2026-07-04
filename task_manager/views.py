@@ -16,7 +16,6 @@ from task_manager.serializers import (
     CategorySerializer,
 )
 from task_manager.models import Task, statuses, SubTask, Category
-from rest_framework.pagination import PageNumberPagination
 
 
 def greetings(request: HttpRequest) -> HttpResponse:
@@ -24,22 +23,16 @@ def greetings(request: HttpRequest) -> HttpResponse:
     return HttpResponse(f"Hello, {username}!")
 
 
-class TaskPagination(PageNumberPagination):
-    page_size = 5
-
-
 class TaskListCreateView(ListCreateAPIView):
     queryset = Task.objects.all()
-    pagination_class = TaskPagination
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter]
+        filters.OrderingFilter
+    ]
 
     filterset_fields = ['status', 'deadline']
     search_fields = ['title', 'description']
-    ordering_fields = ['created_at']
-    ordering = ['-created_at']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -79,13 +72,8 @@ def task_statistics(request):
     return Response(statistics_data, status=status.HTTP_200_OK)
 
 
-class SubTaskPagination(PageNumberPagination):
-    page_size = 5
-
-
 class SubTaskListCreateView(ListCreateAPIView):
     queryset = SubTask.objects.all()
-    pagination_class = SubTaskPagination
 
     filter_backends = [
         DjangoFilterBackend,
@@ -94,8 +82,6 @@ class SubTaskListCreateView(ListCreateAPIView):
     ]
     filterset_fields = ['status', 'deadline']
     search_fields = ['title', 'description']
-    ordering_fields = ['created_at']
-    ordering = ['-created_at']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
