@@ -21,6 +21,24 @@ Access `/admin` to manage:
 
 ## Releases
 
+Release v0.3.0
+### 🔐 Secure Global Cursor Pagination & Isolated Multi-Channel Logging Engine
+
+This release focuses heavily on production infrastructure, application security, and advanced telemetry, hardening the 
+API layer against data scraping and establishing granular observability:
+
+* **Cryptographic Cursor Pagination:** Migrated from vulnerable page-index offsets to global `CursorPagination` wrapped 
+* inside a custom framework layer. All list endpoints now mask page states behind secure token hashes (`?cursor=...`) 
+* with a strict envelope size of **6 objects per page**.
+* **Unified cross-model Sorting:** Standardized the underlying cursor pointer sorting around the unique `id` field, 
+* completely neutralizing internal breaks on abstract models (like `Category`) that do not share timestamps.
+* **Isolated Multi-Stream Logging:** Created a split-channel runtime logging grid that separates standard console 
+* outputs from environment events, dumping incoming HTTP lifecycles into `logs/http_logs.log` and raw ORM-generated SQL 
+* statements into `logs/db_logs.log`.
+* **Self-Building Directories & Version Guardrails:** Introduced automated system setup scripts using `pathlib` to 
+* generate required storage folders out-of-the-box, while reinforcing `.gitignore` parameters to prevent logging files 
+* from spilling into open Git trees.
+
 Release v0.2.4
 ### 🗂️ Category ViewSet, Custom Aggregations & Reusable Soft Deletion System
 
