@@ -21,6 +21,24 @@ Access `/admin` to manage:
 
 ## Releases
 
+Release v0.4.0
+### 🔐 Enterprise JWT Hardening, Global Protection Perimeter & Pagination Tuning
+
+This milestone focuses on securing the API infrastructure against unauthorized access by deploying a stateless token 
+authentication mechanism, sealing all endpoints behind a global security guardrail, and tuning delivery thresholds:
+
+* **Stateless JWT Infrastructure:** Integrated `djangorestframework-simplejwt` to handle user sessions without server-side 
+* state. Configured token lifecycles with a strict **60-minute** expiration window for Access tokens and a **7-day** window 
+* for Refresh tokens to ensure high rotation security.
+* **Exposed Token Rotation Endpoints:** Formulated public routing paths at `/token/` and `/token/refresh/` allowing 
+* clients to seamlessly generate new keys and exchange expired tokens.
+* **Global Security Perimeter:** Swapped open endpoints for a mandatory `IsAuthenticated` global permission rule inside 
+* `settings.py`. Every active route (`/tasks/`, `/subtasks/`, `/categories/`) now implicitly drops anonymous connections 
+* with a `401 Unauthorized` response block.
+* **Optimized Pagination Limits:** Tuned the global REST framework `PAGE_SIZE` configuration along with the кастомный 
+* `CustomCursorPagination` module, dropping the layout density from 6 to exactly **5 items per page** across all 
+* resource models.
+
 Release v0.3.0
 ### 🔐 Secure Global Cursor Pagination & Isolated Multi-Channel Logging Engine
 
@@ -158,6 +176,8 @@ Release v0.1.0
 
 ```bash
 pip install djangorestframework
+pip install django-filter
+pip install djangorestframework djangorestframework-simplejwt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
