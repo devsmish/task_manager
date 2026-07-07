@@ -6,6 +6,7 @@ from rest_framework import status, filters, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 
 from task_manager.serializers import (
     TaskCreateSerializer,
@@ -16,6 +17,7 @@ from task_manager.serializers import (
     CategorySerializer,
 )
 from task_manager.models import Task, statuses, SubTask, Category
+from task_manager.permissions import IsOwner
 
 
 def greetings(request: HttpRequest) -> HttpResponse:
@@ -24,6 +26,7 @@ def greetings(request: HttpRequest) -> HttpResponse:
 
 
 class TaskListCreateView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -47,8 +50,10 @@ class TaskListCreateView(ListCreateAPIView):
 
 
 class TaskDetailUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+
     def get_queryset(self):
-        return Task.objects.filter(owner=self.request.user)
+        return Task.objects.all()
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
@@ -80,6 +85,7 @@ def task_statistics(request):
 
 
 class SubTaskListCreateView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -101,6 +107,8 @@ class SubTaskListCreateView(ListCreateAPIView):
 
 
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+
     def get_queryset(self):
         return SubTask.objects.filter(owner=self.request.user)
 
