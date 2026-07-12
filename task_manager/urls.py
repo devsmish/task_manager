@@ -15,6 +15,8 @@ from task_manager.views import (
     SubTaskDetailUpdateDeleteView,
     CategoryViewSet,
     UserRegisterView,
+    UserLoginView,
+    TokenRefreshCookieView,
 )
 
 router = DefaultRouter()
@@ -32,6 +34,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('auth/register/', UserRegisterView.as_view(), name='auth_register'),
+    path('auth/login/', UserLoginView.as_view(), name='auth_login'),
+    path('auth/refresh/', TokenRefreshCookieView.as_view(), name='auth_refresh'),
 
     path('tasks/', TaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/<int:pk>/', TaskDetailUpdateDestroyView.as_view(), name='task-detail-update-destroy'),
