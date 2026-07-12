@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     # frameworks
     'rest_framework',
     'django_filters',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
     # local
     'task_manager.apps.TaskManagerConfig',
 ]
@@ -149,6 +151,8 @@ REST_FRAMEWORK = {
             'rest_framework_simplejwt.authentication.JWTAuthentication',
         ),
 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_PERMISSION_CLASSES': (
             'rest_framework.permissions.IsAuthenticated',
         ),
@@ -227,4 +231,13 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Task Manager API',
+    'DESCRIPTION': 'API for managing tasks and subtasks with JWT authorization',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'BearerAuth': []}],
+    'COMPONENT_SPLIT_REQUEST': True,
 }

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 from task_manager.managers import SoftDeleteManager
 
 
@@ -60,6 +60,7 @@ class Task(models.Model):
     status = models.CharField(max_length=25, choices=statuses, default='new')
     deadline = models.DateTimeField(null=True, blank=True) # Дата и время дедлайн.
     created_at = models.DateTimeField(auto_now_add=True) # Дата и время создания. Автоматическое заполнение.
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Owner')
 
     def __str__(self):
         return self.title
@@ -80,6 +81,7 @@ class SubTask(models.Model):
     status = models.CharField(max_length=25, choices=statuses, default='new')
     deadline = models.DateTimeField(null=True, blank=True) # Дата и время дедлайн.
     created_at = models.DateTimeField(auto_now_add=True)  # Дата и время создания. Автоматическое заполнение
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Owner')
 
     def __str__(self):
         return self.title

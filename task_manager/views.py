@@ -6,6 +6,7 @@ from rest_framework import status, filters, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 
 from task_manager.serializers import (
     TaskCreateSerializer,
@@ -16,6 +17,7 @@ from task_manager.serializers import (
     CategorySerializer,
 )
 from task_manager.models import Task, statuses, SubTask, Category
+from task_manager.permissions import IsOwner
 
 
 def greetings(request: HttpRequest) -> HttpResponse:
@@ -24,24 +26,34 @@ def greetings(request: HttpRequest) -> HttpResponse:
 
 
 class TaskListCreateView(ListCreateAPIView):
-    queryset = Task.objects.all()
+    permission_classes = [IsAuthenticated]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter
     ]
-
     filterset_fields = ['status', 'deadline']
     search_fields = ['title', 'description']
+
+    # Изменяем queryset: отдаем только задачи текущего пользователя
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return TaskCreateSerializer
         return TaskListSerializer
 
+    # Автоматически сохраняем текущего пользователя как владельца
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class TaskDetailUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    queryset = Task.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        return Task.objects.all()
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
@@ -73,8 +85,7 @@ def task_statistics(request):
 
 
 class SubTaskListCreateView(ListCreateAPIView):
-    queryset = SubTask.objects.all()
-
+    permission_classes = [IsAuthenticated]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -83,14 +94,23 @@ class SubTaskListCreateView(ListCreateAPIView):
     filterset_fields = ['status', 'deadline']
     search_fields = ['title', 'description']
 
+    def get_queryset(self):
+        return SubTask.objects.filter(owner=self.request.user)
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return SubTaskCreateSerializer
         return SubTaskSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
-    queryset = SubTask.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        return SubTask.objects.filter(owner=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
