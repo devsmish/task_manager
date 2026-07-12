@@ -1,12 +1,15 @@
 from django.utils import timezone
 from django.http import HttpRequest, HttpResponse
+from django.db.models import Count
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework import status, filters, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from django.db.models import Count
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from task_manager.serializers import (
     TaskCreateSerializer,
@@ -15,6 +18,7 @@ from task_manager.serializers import (
     SubTaskSerializer,
     SubTaskCreateSerializer,
     CategorySerializer,
+    UserRegisterSerializer,
 )
 from task_manager.models import Task, statuses, SubTask, Category
 from task_manager.permissions import IsOwner
@@ -130,3 +134,22 @@ class CategoryViewSet(viewsets.ModelViewSet):
             'category': category.name,
             'task_count': task_count
         })
+
+
+class UserRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=UserRegisterSerializer,
+        responses={201: UserRegisterSerializer, 400: None},
+        description="Endpoint for creating a new user account with secure password hashing."
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "User registered successfully.", "user": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
