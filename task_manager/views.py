@@ -4,13 +4,15 @@ from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 
+from rest_framework import status, filters, viewsets
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework import status, filters, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from drf_spectacular.utils import extend_schema
 
@@ -228,5 +230,29 @@ class TokenRefreshCookieView(TokenRefreshView):
                 )
 
             response.data = {"detail": "Token refreshed successfully."}
+
+        return response
+
+
+class UserLogoutView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Logs out the user by blacklisting their refresh token and clearing authentication cookies."
+    )
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except TokenError:
+                pass
+
+        response.delete_cookie('access_token', path='/')
+        response.delete_cookie('refresh_token', path='/')
 
         return response

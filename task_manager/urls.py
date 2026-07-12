@@ -17,6 +17,7 @@ from task_manager.views import (
     UserRegisterView,
     UserLoginView,
     TokenRefreshCookieView,
+    UserLogoutView,
 )
 
 router = DefaultRouter()
@@ -36,6 +37,7 @@ urlpatterns = [
     path('auth/register/', UserRegisterView.as_view(), name='auth_register'),
     path('auth/login/', UserLoginView.as_view(), name='auth_login'),
     path('auth/refresh/', TokenRefreshCookieView.as_view(), name='auth_refresh'),
+    path('auth/logout/', UserLogoutView.as_view(), name='auth_logout'),
 
     path('tasks/', TaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/<int:pk>/', TaskDetailUpdateDestroyView.as_view(), name='task-detail-update-destroy'),
@@ -44,3 +46,5 @@ urlpatterns = [
     path('subtasks/', SubTaskListCreateView.as_view(), name='subtask-list-create'),
     path('subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view(), name='subtask-detail-update-delete'),
 ]
+
+# feat(auth): implement user logout and token blacklisting

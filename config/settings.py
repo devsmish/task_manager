@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
     # local
     'task_manager.apps.TaskManagerConfig',
 ]
