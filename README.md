@@ -21,6 +21,26 @@ Access `/admin` to manage:
 
 ## Releases
 
+Release v0.6.0
+### 🍪 Secure Cookie-Based Authentication, Automated Token Refresh & Token Blacklisting
+
+This milestone hardens the authentication layer by transitioning session storage to client-side secure cookies, 
+automating token lifecycles, and implementing a database-backed blacklist ecosystem to fully eliminate token replay 
+vulnerabilities:
+
+* **Secure Account Registration (Closes #65):** Established a strict account creation pipeline featuring deep field 
+* validation, automated password hashing via Django's core validators, and ironclad uniqueness constraints on both 
+* usernames and emails.
+* **HTTP-Only Cookie Encapsulation (Closes #66):** Neutralized XSS injection threats by intercepting standard JWT 
+* responses and embedding short-lived Access and long-lived Refresh tokens into cryptographic `httpOnly`, `Secure`, 
+* and `SameSite=Lax` browser cookies.
+* **Custom Cookie-Aware Auth Backend (Closes #67):** Engineered a specialized `JWTCookieAuthentication` provider that 
+* transparently extracts and decodes access keys from incoming HTTP request cookies while maintaining structural 
+* fallback compatibility for traditional Bearer tokens.
+* **Server-Side Token Blacklisting & Session Purge (Closes #68):** Integrated an explicit database-backed 
+* `token_blacklist` routine to permanently invalidate active refresh tokens upon logout, complemented by automated 
+* client-side cookie deletion blocks to ensure comprehensive session termination.
+
 Release v0.5.0
 ### 🛡️ User Ownership Isolation, Custom Object-Level Security & OpenAPI 3.0 Documentation
 
@@ -36,9 +56,9 @@ object-level access controls, and fully automated OpenAPI 3.0 interactive schema
 * specific resource IDs. Malicious or unauthorized attempts to alter or delete foreign rows now trigger an explicit 
 * `403 Forbidden` termination block.
 * **OpenAPI 3.0 Specs via drf-spectacular:** Deployed `drf-spectacular` to serve as the unified API blueprint engine. 
-* Exposed secure paths for raw schema delivery (`/api/schema/`), 
-* responsive Swagger UI components (`/api/schema/swagger-ui/`), 
-* and clean ReDoc documentation interfaces (`/api/schema/redoc/`).
+* Exposed secure paths for raw schema delivery (`/api/v1/schema/`), 
+* responsive Swagger UI components (`/api/v1/schema/swagger-ui/`), 
+* and clean ReDoc documentation interfaces (`/api/v1/schema/redoc/`).
 * **Interactive JWT Interceptor:** Structured global configuration properties inside `settings.py` to embed native 
 * JWT Bearer authentication locks into the Swagger interface, enabling seamless sandbox manual endpoint testing.
 
@@ -48,9 +68,9 @@ Release v0.4.0
 This milestone focuses on securing the API infrastructure against unauthorized access by deploying a stateless token 
 authentication mechanism, sealing all endpoints behind a global security guardrail, and tuning delivery thresholds:
 
-* **Stateless JWT Infrastructure:** Integrated `djangorestframework-simplejwt` to handle user sessions without server-side 
-* state. Configured token lifecycles with a strict **60-minute** expiration window for Access tokens and a **7-day** window 
-* for Refresh tokens to ensure high rotation security.
+* **Stateless JWT Infrastructure:** Integrated `djangorestframework-simplejwt` to handle user sessions without 
+* server-side state. Configured token lifecycles with a strict **60-minute** expiration window for Access tokens and 
+* a **7-day** window for Refresh tokens to ensure high rotation security.
 * **Exposed Token Rotation Endpoints:** Formulated public routing paths at `/token/` and `/token/refresh/` allowing 
 * clients to seamlessly generate new keys and exchange expired tokens.
 * **Global Security Perimeter:** Swapped open endpoints for a mandatory `IsAuthenticated` global permission rule inside 
