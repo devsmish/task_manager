@@ -21,6 +21,27 @@ Access `/admin` to manage:
 
 ## Releases
 
+Release v0.5.0
+### 🛡️ User Ownership Isolation, Custom Object-Level Security & OpenAPI 3.0 Documentation
+
+This milestone completes the security and documentation ecosystem by introducing multi-tenant data isolation, strict 
+object-level access controls, and fully automated OpenAPI 3.0 interactive schemas:
+
+* **Contextual User Extraction & Ownership:** Added an `owner` ForeignKey relation linked to the Django User model 
+* across both Task and SubTask records. Overrode `perform_create()` view hooks to seamlessly bind the authenticated 
+* `request.user` to newly created objects while protecting the database via read-only serializer controls.
+* **Isolated Queryset Multi-Tenancy:** Restructured the `get_queryset()` pipelines on list endpoints, establishing 
+* automatic database-level filtering so that users can strictly interact with data they own.
+* **Granular Object permissions:** Engineered a custom `IsOwner` permission validator inside `permissions.py` to protect 
+* specific resource IDs. Malicious or unauthorized attempts to alter or delete foreign rows now trigger an explicit 
+* `403 Forbidden` termination block.
+* **OpenAPI 3.0 Specs via drf-spectacular:** Deployed `drf-spectacular` to serve as the unified API blueprint engine. 
+* Exposed secure paths for raw schema delivery (`/api/schema/`), 
+* responsive Swagger UI components (`/api/schema/swagger-ui/`), 
+* and clean ReDoc documentation interfaces (`/api/schema/redoc/`).
+* **Interactive JWT Interceptor:** Structured global configuration properties inside `settings.py` to embed native 
+* JWT Bearer authentication locks into the Swagger interface, enabling seamless sandbox manual endpoint testing.
+
 Release v0.4.0
 ### 🔐 Enterprise JWT Hardening, Global Protection Perimeter & Pagination Tuning
 
