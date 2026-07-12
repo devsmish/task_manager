@@ -5,7 +5,8 @@ from task_manager.models import Task, SubTask, Category
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'status', 'deadline']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'owner']
+        read_only_fields = ['owner']
 
     def validate_deadline(self, value):
         if value and value < timezone.now():
@@ -16,7 +17,7 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 class TaskListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
 
 
 class SubTaskCreateSerializer(serializers.ModelSerializer):
@@ -24,7 +25,8 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['owner']
 
 
 class CategoryCreateSerializer(serializers.ModelSerializer):
@@ -50,7 +52,7 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
@@ -58,7 +60,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtask_set']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtask_set', 'owner']
 
 
 class CategorySerializer(serializers.ModelSerializer):
