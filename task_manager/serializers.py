@@ -1,6 +1,9 @@
 from django.utils import timezone
 from rest_framework import serializers
 from task_manager.models import Task, SubTask, Category
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.validators import UniqueValidator
 
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -67,3 +70,35 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(), message="A user with this email already exists.")]
+    )
+
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password]
+    )
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {
+            'username': {
+                'required': True,
+                'validators': [
+                    UniqueValidator(queryset=User.objects.all(), message="A user with this username already exists.")]
+            }
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user

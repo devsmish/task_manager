@@ -1,12 +1,20 @@
 from django.utils import timezone
 from django.http import HttpRequest, HttpResponse
-from rest_framework.decorators import api_view, action
-from rest_framework.response import Response
-from rest_framework import status, filters, viewsets
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+
+from rest_framework import status, filters, viewsets
+from rest_framework.decorators import api_view, action
+from rest_framework.response import Response
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+
+from drf_spectacular.utils import extend_schema
 
 from task_manager.serializers import (
     TaskCreateSerializer,
@@ -15,6 +23,7 @@ from task_manager.serializers import (
     SubTaskSerializer,
     SubTaskCreateSerializer,
     CategorySerializer,
+    UserRegisterSerializer,
 )
 from task_manager.models import Task, statuses, SubTask, Category
 from task_manager.permissions import IsOwner
@@ -130,3 +139,120 @@ class CategoryViewSet(viewsets.ModelViewSet):
             'category': category.name,
             'task_count': task_count
         })
+
+
+class UserRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=UserRegisterSerializer,
+        responses={201: UserRegisterSerializer, 400: None},
+        description="Endpoint for creating a new user account with secure password hashing."
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "User registered successfully.", "user": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Authenticates user and signs them in by setting access and refresh tokens via httpOnly cookies."
+    )
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            access_token = response.data.get('access')
+            refresh_token = response.data.get('refresh')
+            response.data = {"detail": "Login successful."}
+            response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite='Lax',
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+            )
+
+            response.set_cookie(
+                key='refresh_token',
+                value=refresh_token,
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite='Lax',
+                max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
+            )
+
+        return response
+
+
+class TokenRefreshCookieView(TokenRefreshView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Refreshes access token automatically using the refresh token from httpOnly cookies."
+    )
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if refresh_token:
+            request.data['refresh'] = refresh_token
+
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            access_token = response.data.get('access')
+            response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite='Lax',
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+            )
+
+            refresh_token_new = response.data.get('refresh')
+            if refresh_token_new:
+                response.set_cookie(
+                    key='refresh_token',
+                    value=refresh_token_new,
+                    httponly=True,
+                    secure=not settings.DEBUG,
+                    samesite='Lax',
+                    max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
+                )
+
+            response.data = {"detail": "Token refreshed successfully."}
+
+        return response
+
+
+class UserLogoutView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Logs out the user by blacklisting their refresh token and clearing authentication cookies."
+    )
+    def post(self, request, *args, **kwargs):
+        response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except TokenError:
+                pass
+
+        response.delete_cookie('access_token', path='/')
+        response.delete_cookie('refresh_token', path='/')
+
+        return response
