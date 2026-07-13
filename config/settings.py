@@ -242,3 +242,6 @@ SPECTACULAR_SETTINGS = {
     'SECURITY': [{'BearerAuth': []}],
     'COMPONENT_SPLIT_REQUEST': True,
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply_admin@taskmanager.local.my'
