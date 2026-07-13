@@ -2,6 +2,7 @@
 
 ## Overview
 Simple Django-based Task Manager application with support for tasks, subtasks, and categories.
+Simple Django-based Task Manager application with support for tasks, subtasks, and categories.
 
 ## Features
 - Task, SubTask, Category models
@@ -20,6 +21,25 @@ Access `/admin` to manage:
 - Categories
 
 ## Releases
+
+Release v0.7.0
+### ⚡ Automated Task Lifecycle Signals, Owner Email Notifications & Idempotency Guards
+
+This milestone introduces an automated notification subsystem powered by Django event signals, enabling real-time email 
+alerts for task state modifications while establishing strict delta validation to eliminate duplicate communication 
+channels:
+
+* **Task Lifecycle Signals (Closes #74):** Engineered a `pre_save` signal layer bound to the core `Task` model to 
+* dynamically intercept task updates, state transitions, and absolute closures.
+* **Owner Email Notification Routing (Closes #74):** Integrated an automated notification routine that compiles and 
+* dispatches formatted text alerts directly to the assigned task `owner` email whenever a valid status change is 
+* detected.
+* **Idempotency & Anti-Spam Verification (Closes #74):** Implemented pre-save database delta checks to compare incoming 
+* status values against existing database records, strictly suppressing notification triggers during consecutive saves 
+* with unchanged statuses.
+* **Console Email Engine Integration (Closes #74):** Configured a local development email ecosystem inside `settings.py` 
+* using Django's console email backend to safely stream outbound email payloads directly to the server terminal for 
+* debugging.
 
 Release v0.6.0
 ### 🍪 Secure Cookie-Based Authentication, Automated Token Refresh & Token Blacklisting
